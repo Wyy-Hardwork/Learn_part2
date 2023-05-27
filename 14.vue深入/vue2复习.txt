@@ -1,0 +1,25 @@
+1.还记得new Vue后的实例对象吗
+const app = new Vue({
+    el:'#app'
+    data:{
+        name:'你好'
+    }
+})
+其实el不写也行，可以用app.$mount('#app')
+
+2.再看看defineProperty
+Object.defineProperty(obj,'name',{
+    value:'Hina',
+    enumerable:true,//可枚举
+    writable:true,//属性是否可以赋值，false代表不能赋值
+    configurable:true//可删除(delete修改)，false不能修改，也不能删除
+
+    get:function(){
+        return '还要解释getter怎么用吗'
+    }
+    set:function(){
+        log('还要解释setter怎么用吗')
+    }
+})
+
+3.关于根组件app，它存储的data究竟在对象的哪里呢？

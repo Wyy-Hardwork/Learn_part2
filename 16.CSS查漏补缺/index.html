@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="checkbox" id="myCheckbox" value="fire"> 
+    <div id="id_fire">
+        <div class="bg"></div>
+    </div>
+</body>
+<script>
+
+</script>
+<style>
+    .bg{
+        width: 500px;
+        height: 500px;
+        background-color: aquamarine;
+    }
+
+    #id_fire .bg {
+   /* 图片没有被选中时不旋转 */
+   transform: rotateZ(0deg);
+}
+
+    #myCheckbox:checked ~ #id_fire .bg {
+   /* 当复选框被勾选时旋转图片 */
+   -webkit-transform:rotate(99999deg);
+    transform:rotate(99999deg);
+    -webkit-transition:-webkit-transform 999s linear;
+    transition:transform 999s linear;
+}
+</style>
+</html>

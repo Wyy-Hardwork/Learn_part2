@@ -1,0 +1,51 @@
+请掌握
+快速排序算法：快速排序是一种常用的排序算法，它的时间复杂度为 O(nlogn)。
+
+二分查找算法：二分查找算法是一种在有序数组中查找某个元素的算法，它的时间复杂度为 O(logn)。
+
+哈希算法：哈希算法是一种将任意长度的消息压缩到固定长度的消息摘要的算法，它常用于加密和验证数据完整性。
+
+动态规划算法：动态规划算法是一种将复杂问题分解成更小的子问题来解决的算法，它常用于优化问题和最优化问题。
+
+贪心算法：贪心算法是一种每一步都选择最优解的算法，它常用于最优化问题和近似算法。
+
+深度优先搜索算法：深度优先搜索算法是一种在图或树中搜索所有可能路径的算法，它常用于解决路径问题和遍历问题。
+
+广度优先搜索算法：广度优先搜索算法是一种在图或树中搜索所有可能路径的算法，它常用于解决路径问题和遍历问题。
+
+快速排序算法，左右拆分，依次递归，直到数组长度一
+function quickSort(arr) {
+  if (arr.length <= 1) {
+    return arr;
+  }
+  const pivotIndex = Math.floor(arr.length / 2);
+  const pivot = arr[pivotIndex];
+  const left = [];
+  const right = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i === pivotIndex) {
+      continue;
+    }
+    if (arr[i] < pivot) {
+      left.push(arr[i]);
+    } else {
+      right.push(arr[i]);
+    }
+  }
+  return [...quickSort(left), pivot, ...quickSort(right)];
+}
+
+洗牌算法，每次随机数取值范围-1，放到数组最后一位
+Array.prototype.shuffle = function() {
+    var input = this;
+
+    for (var i = input.length-1; i >=0; i--) {
+
+        var randomIndex = Math.floor(Math.random()*(i+1));
+        var itemAtIndex = input[randomIndex];
+
+        input[randomIndex] = input[i];
+        input[i] = itemAtIndex;
+    }
+    return input;
+}

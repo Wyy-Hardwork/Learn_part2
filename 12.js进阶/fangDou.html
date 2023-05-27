@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button id="myButton">点击我</button>
+</body>
+<script>
+let myButton = document.getElementById("myButton");//获取DOM接口，是标签
+
+function click(){
+  console.log('点击触发');
+}
+function debounce(fn,time){
+  console.log('触发防抖');
+  let timer
+  return function(){
+    console.log(this);
+  if(timer) clearTimeout(timer)
+  timer = setTimeout(function(){
+    fn()
+  },time)
+  }
+}
+myButton.addEventListener("click",debounce(click,500));
+//addEventListener第一个是触发方式，第二个是触发函数
+//addEventListener特性：如果直接调用而非写匿名函数，那么就会立即执行。不过return一个函数改变原来的函数就行
+//addEventListener的第二个参数会被return改变，不过因为闭包特性，timer不会被立即释放
+//a = function(){}是一种函数表达式（Function Expression）的写法。
+//function a(){}是一种函数声明（Function Declaration）的写法。
+</script>
+</html>

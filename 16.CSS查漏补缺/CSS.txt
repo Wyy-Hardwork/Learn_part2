@@ -1,0 +1,174 @@
+1.CSS有两种盒子模型:IE盒模型(border-box),W3C标准盒模型(content-box);
+其中盒模型包括了:内容,内边距(填充padding),边框,外边距;
+-IE盒模型,宽高包含了内容,填充,边距;
+-W3C盒模型,宽高只包含内容;
+如果在页面中声明了DOCTYPE类型,默认W3C盒模型
+
+2.CSS的选择器
+id选择器(#id)
+类选择器(.class)
+标签选择器(div)
+后带选择器(div span) 跨代
+子选择器(ul > li) 严格按代
+兄弟选择器(.c ~ .e) 选择和c类同级的所有e类元素,不包含c类
+相邻兄弟选择器(.c + .e) 选择所有和c类同级,且紧贴在c后的e类元素,不包含c类
+-属性选择器(div[class~="c"]) 选择包含c类的div元素，和*不同在于，要写完整；
+其中等于 (=) 、以特定字符串开头 (^) 、以特定字符串结尾 ($) 、包含特定字符串 (*)
+
+3.伪元素
+::after，必须指定content内容才会显示，本质是一个子行内元素，好在不用改html代码
+
+4.有继承性的属性
+字体，文本等可继承;
+边框,位置,宽度之类的布局不可继承;
+优先级：!import -> 内联style属性 -> id选择器 -> class类选择器 -> 
+a[href='..']属性选择器 -> 标签选择器p -> 通配符* -> 继承样式;
+其中特殊性分类四个等级,(!import没有等级,不过特殊记忆1,0,0,0,0)
+内联1,
+id 0,1
+class 0,0,1
+元素和伪元素 0,0,0,1
+
+5.内联元素,块级元素
+-内联元素:只占据必要宽高,也不能设置宽高,可以一行多个;
+水平方向的padding和margin可以生效,如果想要垂直生效,需要line-height(a,span,img)
+-块级元素:默认情况独占一行,并且水平垂直padding,margin都有效,
+完全填满父元素可用宽度,不过可以设置宽高,但仍占一行;
+-内联块级元素:可以一行显示多个,并且水平垂直padding,margin都有效
+
+6.水平居中与垂直居中
+水平居中比较简单:
+-内联元素可以在父元素使用text-align:center,
+-块级元素可以使用margin:0 auto;
+-position:absolute可以借助定位元素，把容器范围?拉伸到整个页面，
+再通过margin来实现居中效果。
+-让position相对父亲top，left 50%，这时候定位点位于容器中心，但是盒子处于
+四象限的第四象限，左边紧贴y轴，上边紧贴x轴，用transform:translate(-50%,-50%)
+就可以了。
+-如果涉及到打破文档流相关，记得给父元素添加position：relative来接住absolute
+
+7.top和margin-top
+top和position紧密联系
+-top用于设置相对于父元素的位置,它们只能配合fixed，absolute，relative
+或者sticky使用,否则无效.不设置的话依然处于默认文档流;
+如果使用了上面的position，不使用定位属性的话，依旧保持原本文档流定位，只会有
+其他的盒子挤进来。
+-margin-top就是根据旁边的盒子来定位了。
+
+8.标准流,文档流（Normal flow）与脱标(position:absolute/fixed)元素
+浏览器视口内，从左到右，从上到下顺序摆放，默认情况元素之间不存在层叠现象；
+而脱离文档流，就是不再按标准流排序。意味着脱离文档流是脱标的父。
+脱标：设置position为fixed或者absolute；
+-脱标元素特点：
+块级元素：脱标后，宽高由内容撑开，活像一个内联元素，不过可以设置宽高;
+内联元素：脱标后，宽高由内容撑开，可以设置宽高了!
+脱标后都一样，宽高默认auto
+不受标准流的约束；
+不再给父元素汇报宽高数据，也就是不能将父元素撑开。
+
+9.position们
+-静态定位static：
+默认属性，不设置就有，定位元素们没有任何效果；
+-相对定位relative:
+元素按照标准流排布，可通过定位元素调整自己位置，且不影响其他元素位置；
+-绝对定位absolute:
+脱标，定位参照最近'有定位'元素的祖先元素，没有的话，就会参照视口
+不设置定位元素(如top)默认为auto，auto会让absolute元素留在原地。
+ps.(1)简单来说如果隔壁也是position，那么它们会共享top之类的定位元素，也就是
+“参照最近有position元素的祖先元素”，变成一个正常的可继承的子盒子，而不会'太脱标'
+试了一下，子盒子的top无视了padding，但没有无视border。
+(2)所以有了子绝对父相对一说定位，用于防止absolute直接相对视口，太离谱。
+-固定定位fixed
+脱标，定位参照是视口，可通过定位元素调整自己的位置，一样不影响别人。
+这个脱标和absolute有很大区别，它只针对视口，而非最近的'有定位元素的祖先元素'
+和absolute一样会失去撑开父容器的能力。
+-固定定位sticky
+有点像fixed中的relative，在被滚动条挤压容器前保持原位，被滚动条挤压容器后会类似fixed跟随滚动，
+但是仍然会保持原本位置的空间，保持撑开。
+它也会和relative一样保留着文档流，在滚动后实现fixed效果。
+实验后无视margin，碰到content和padding后会一起滚动。
+sticky 元素（祖先）容器使用了 overflow: hidden 时，sticky 就失效了。
+
+10.float浮动
+使用float意味着使用块级元素，可以把让文本环绕在块周围而非独占一行。
+使用后高度会失去，如果使用float容器撑起父容器的话，需要加一个新的
+块级元素，再加上clear:both以清除浮动
+
+11.transform
+transform: translate(0px,100%);可写第一个省略第二个，默认0；
+百分号是以自己的宽高来算的.
+ps.对内联元素是无效的
+
+12.flex布局
+-父flex-direction:初始row,row-reverse;column,column-reverse
+-父flex-wrap: warp;当盒子超出容器，flex会自动缩小盒子，如果不想缩小盒子而是换行，使用
+-父flex-flow 将flex-direction和flex-wrap简写；如flex-flow:row wrap;
+
+-子flex-basis是单元的兜底宽或高，width/height优先度更高，没有就用这个，且会被内容撑开。
+默认auto，被内容撑开最小值。
+-子flex-grow 分配单元在可用空间的占比，随便写数字，后续会按这个数字占比来分割
+单元占用空间，但不会把其他内容挤到坍缩。
+-子flex-shrink 和grow相反，越大自己越小，也是按照父容器比例算的，应该是取倒数吧
+子flex的简写: flex:flex-grow,flex-shrink,flex-basis
+
+-父align-items:默认stretch填满，flex-start，flex-end，center，根据内容高度，
+然后按顶部/底部/中央对齐;
+垂直方向的操作*
+-父justify-content:默认flex-start,flex-end,center;
+space-around:开头和结尾空位是中心的一半；
+space-evenly:完全一样的空位；
+space-between:开头和结尾没有空位，其他的空位平分。
+水平方向的操作*
+
+13.display的属性
+block-块；inline-行内；inline-block-行内块；
+none:不显示，并且从文档流中移除
+list-item 像块元素一样显示，并添加样式列表标记 ?
+table 作为块级表格显示 ?
+inherit 继承父亲的display
+
+14.float浮动
+float:left,right;当元素使用float后,会被移出正常文档流,然后向左/右平移,知道
+碰到了容器的边框,或者碰到另一个'float'元素;
+float会失去占用空间的能力,类似absolute
+
+15.BFC(Block Formatting Context块格式化上下文),
+我发现主要还是用来防止float导致的各种坍缩问题
+(1)它是一个独立的渲染区域，只有Block-level box参与,
+它规定了内部的Block-level Box如何布局，并且与这个区域外部毫不相干。 
+(2)一个BFC有什么特征:
+-1.内部的box会垂直方向上一个一个放置;
+-2.内部垂直方向的margin会发生重叠,如margin-bottom:20px和margin-top:10px,以为是30px,
+结果取大的那个值,也就是20px;
+--但是如果你是两个独立BFC容器，那么这种20px就会变为30px，达到目的。
+-3.内部存在float浮动,给父容器加个overflow:hidden触发父元素BFC，从而撑开自己。
+-4.避免*自己*被旁边的浮动元素覆盖,给自己加个overflow:hidden触发自己的BFC
+(3)那这块渲染区域到底在哪，它又是有多大，由生成BFC的元素决定，需要满足以下:
+float值不为none(默认值,没有浮动);
+overflow值不为visible(默认值,不修剪,会呈现元素框外内容);
+display值为inline-block,table-cell,table-caption的任一;
+其他的记不住了
+
+16.四种两栏实现方式
+左边固定200px，右边可以这么搞：
+margin-left ,width:auto;
+左边flex:0,0,200px,右边flex:1
+左边absolute,右边margin-left
+左边固定，右边absolute，利用父relative，自己top，left来弄
+
+17.百分比
+公式：当前元素某CSS属性值 = 基准 * 对应的百分比
+元素的 position 为 relative 和 absolute 时，top和bottom、left和right基准分别为包含块的 height、width
+元素的 position 为 fixed 时，top和bottom、left和right基准分别为初始包含块（也就是视口）的 height、width，移动设备较为复杂，基准为 Layout viewport 的 height、width
+元素的 height 和 width 设置为百分比时，基准分别为包含块的 height 和 width
+元素的 margin 和 padding 设置为百分比时，基准为包含块的 width（易错）
+元素的 border-width，不支持百分比
+元素的 text-indent，基准为包含块的 width
+包含块简单点说就是父元素盒子
+
+元素的 border-radius，基准为分别为自身的height、width
+元素的 background-size，基准为分别为自身的height、width
+元素的 translateX、translateY，基准为分别为自身的height、width
+元素的 line-height，基准为自身的 font-size
+
+元素的 font-size，基准为父元素字体

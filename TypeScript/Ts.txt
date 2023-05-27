@@ -1,0 +1,13 @@
+tsc,TypeScript编译器
+npm install -g typescript
+全局安装ts编译器tsc
+
+并不总是必须编写显式类型注释,很多情况下,ts会帮我们判断.
+let str = 'ss'  //自动判断类型string
+
+tsc后会帮我们擦除一些东西,比如
+函数function参数的类型注释
+模板字符串(``)会被转换成带有连接的纯字符串
+为什么?因为默认会按ES3为标准来兼容js,就算目前大部分浏览器都兼容ES6
+
+对于数组,你可以限制为string[],也可以写Array<string>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+  <div class="container">
+    <qq>Box 1</qq>
+  </div>
+</body>
+<script>
+  class Animal{
+    constructor(executor){//这里接收了一个回调
+      this.state = 'pending'
+      this.result = null
+      this.reason = null
+      executor(this.resolve.bind(this),this.reject.bind(this))
+      //在这里选择执行函数，执行的两个参数都是函数，
+      //在下面作为回调(下面那个匿名函数)函数体内，有着对这两个参数(a,b)的处理
+      //函数调用时，this指向也会发生变化，请使用bind让this重回正轨，谢谢
+      //不然的话调用函数后，this会指向window/undefined。
+      // 在函数调用时采用bind，即可让函数体内的this指向目标
+    }
+    resolve(result){
+      if(this.state === 'pending'){
+        this.state = 'fulfilled'
+        this.result = result
+      }
+    }
+    reject(reason){
+      if(this.state === 'pending'){
+        this.state = 'rejected'
+        this.reason = reason
+      }
+    }
+    then(onFulfilled,onRejected){
+      onFulfilled = typeof onFulfilled === 'function' ? onFulfilled:value => value
+      onRejected = typeof onRejected === 'function' ? onRejected:reason =>{
+        throw reason
+      }
+      if(this.state === 'fulfilled'){
+        onFulfilled(this.result)
+      }else if(this.state === 'rejected'){
+        onRejected(this.reason)
+      }else if(this.state === 'pending'){
+
+      }
+    }
+  }
+
+
+let b = new Animal((a)=>{
+  a()//回调函数处理a，就是调用a
+})
+console.log(b);
+
+new Promise((res)=>{
+
+}).then()
+
+
+
+
+
+</script>
+<style>
+  .container {
+  border: 1px solid black;
+  /* 使用 BFC */
+  overflow: hidden;
+  height: 100%;
+}
+
+.box {
+  width: 100px;
+  height: 100px;
+  margin: 20px;
+  background-color: gray;
+  position: absolute;
+}
+
+.box1 {
+  width: 100px;
+  height: 150px;
+  margin: 20px;
+  background-color: red;
+}
+</style>
+</html>

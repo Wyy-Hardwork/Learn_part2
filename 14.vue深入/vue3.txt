@@ -1,0 +1,318 @@
+Vue3最大的改变
+1.Vue全局API
+Vue的全局API被弃用
+
+Vue的性能优化
+Vue3的diff算法对只带有静态标记的DOM进行比较,patchFlag(静态标记).
+在创建虚拟DOM时,根据DOM内容是否会发生变化,而给予相应类型的patchFlag,
+在更新前节点进行比较时,智慧去对比带有静态标记的节点.
+
+Vue的核心特性
+数据驱动(MVVM Model-View-ViewModel)
+Model：模型层，负责处理业务逻辑和服务端交互
+View：视图层，HTML页面，也是用户操作接口
+ViewModel：视图模型层，连接Model和View，通信桥梁。
+
+v-show和v-if原理
+v-show通过添加display:none实现，dom元素依然存在；
+v-if是将整个dom元素添加或者移除。
+所以如果需要频繁切换，使用v-show；如果条件很少改变，用v-if比较好
+
+Proxy
+    let obj = new Proxy(person,{
+        get:function(target//劫持目标对象,prop//劫持目标对象的属性){
+            for (let key in target) {
+                console.log(key);
+            }
+            console.log(prop);
+        }
+    })
+
+如果使用revocable静态方法,那么这个Proxy将是可以撤销的.
+const {proxy, revoke} = Proxy.revocable(target, handler)
+revoke()//Proxy.revocable(target, handler).revoke()
+proxy.name //TypeError:Revoked
+这个静态方法会返回除了普通Proxy对象以外,还有个revoke函数,调用它,开启revoke
+
+Proxy有时会体现在团队作用，比如私有属性。
+在监听属性前加一个_，然后在Prxoy对属性进行监听，对于第一个字符是"_"的字符
+无论修改还是引用，直接抛出错误，从而实现避免调用的作用，
+当然了，这是针对实例后的proxy对象。这应该和Vue3有一定关联。
+
+关于Reflect的意义
+提供了一组更加规范和统一的方法操作对象,对于Object的方法,Reflect的方法更加直观,
+更加适合配合Proxy等使用,以下举例:
+let b = Reflect.defineProperty(a,'name',{value:'jack'})
+
+defineProperty和Proxy有个区别
+前者可以直接在这个静态方法中实现属性的监听，
+但是Proxy需要实例化后proxy对象，也就是代理对象，来实现属性的监听。
+
+关于vue2的响应数据添加问题
+data init是在created之前的，那个时候会给data绑定一个观察者Observer
+每个data的set中添加一个,dep.notify()函数通知更新视图
+-Vue通过对数据对象进行递归遍历,将每个属性都转换为getter/setter的形式进行监听;
+当获取数据时,触发getter函数,判断是否有订阅者(Dep.target),有则依赖收集,
+返回该属性的值作为结果;
+设置数据时,触发setter函数,它先将新的值赋予value,然后通知所有订阅者进行更新;
+Dep负责收集订阅者(一般是Watcher对象),执行dep.notify()则会便利执行subs中所有
+订阅者的update()方法,从而实现视图更新.
+
+Set,Map,WeakSet,WeakMap的补充
+Set对象允许存储任何类型的唯一值,无论是原始值或是对象引用;
+set中的元素唯一,不会重复;
+Set本身是个构造函数,用于生成Set数据结构.
+操作方法 add(value),delete(value),has(value),clear()
+遍历方法 keys() values() entries()返回键值对 forEach()使用回调函数遍历
+但是关于键值对,Set没法传入普通对象,所以keys和values效果一样,美其名曰规范.
+-然后可以用Array.from()来吧Set,Map类型以及伪数组来转换为真数组,利用迭代器接口
+但是对于普通对象,Array.from也是可用的,不过得处理一下,类似Set:
+Array.from(Object.keys(obj)
+
+-Set的妙用,去重,交集,差集
+// 数组去重
+let arr = [1, 1, 2, 3];
+let unique = [... new Set(arr)];
+
+let a = new Set([1, 2, 3]);
+let b = new Set([4, 3, 2]);
+    
+// 并集
+let union = [...new Set([...a, ...b])]; // [1,2,3,4]
+// 交集
+let intersect = [...new Set([...a].filter(x => b.has(x)))]; [2,3] 
+// 差集
+let difference = Array.from(new Set([...a].filter(x => !b.has(x)))); [1]
+
+-WeakSet只能是对象的集合,其他值都不行.
+WeakSet对象的引用为弱引用,如果没有其他的对WeakSet中的引用,那么就会被立即回收,
+意味着WeakSet中没有存储当前对象的列表.正因如此,WeakSet不可枚举.
+WeakSet不被引用立即回收。
+
+-Map就可以用来保存键值对，并且能够记住键的原始插入顺序，任何值(对象或原始值)都
+可以作为一个键或者值。有以下操作方法和遍历方法：
+set(key,value),get(key),has(key),delete(key),clear()
+keys(),values(),entries(),forEach()
+
+Map 的键可以是任意类型，WeakMap 的键只能是对象类型
+WeakMap 键名所指向的对象，不计入垃圾回收机制
+
+-总结Set它们
+Set、Map、WeakSet、WeakMap、都是一种集合的数据结构
+Set、WeakSet 是[值,值]的集合，且具有唯一性
+Map 和 WeakMap 是一种[键,值]的集合，Map 的键可以是任意类型，WeakMap 的键只能是对象类型
+Set 和 Map 有遍历方法，WeakSet 和 WeakMap 属于弱引用不可遍历
+#参考
+
+Symbol(描述),其中描述是字符串类型,可选,可用于调试点不是访问symbol本身
+
+vue的核心结构
+省略其他的,比较重要的结构:
+compiler-core //核心中的核心,抽象语法树和渲染桥接实现
+compiler-dom //Dom的实现
+compiler-sfc //Vue单文件组件.vue的实现
+compiler-ssr
+global.d.ts
+reactivity
+runtime-core/dom/test
+server-renderer //服务端渲染实现
+shared //package之间共享的工具库
+size-check
+template-explorer
+vue
+通过结构,看到package中重要的模块有五个,分别为:
+compiler-core,compiler-dom,runtime-core,runtime-dom,reactivity
+
+compile time可以理解为程序编译时,源码在被编译成目标文件的这段时间;
+通俗来讲就是写好的源代码被转换成最终可执行文件的这段时间,也就是.Vue单文件
+编译成浏览器能够识别的.html文件的一些工作.
+run time可以理解为程序运行时,就是程序被编译之后,打开程序并运行它直到关闭
+这段时间的系列处理.
+
+createApp相关
+1. Vue.createApp(HelloVueApp).mount('#hello-vue'),一切从createApp开始
+export const createApp = ((...args) => {
+  const app = ensureRenderer().createApp(...args)
+
+2.这里用到了ensureRenderer()，这时候会处理props属性，也会处理DOM节点；
+const rendererOptions = {
+  patchProp,  // 处理 props 属性 
+  ...nodeOps // 处理 DOM 节点操作
+}
+
+3.后续调用createRenderer()
+function ensureRenderer() {
+  return renderer || (renderer = createRenderer(rendererOptions))
+}
+createRenderer调用很多函数
+export function createRenderer<
+  HostNode = RendererNode,
+  HostElement = RendererElement
+>(options: RendererOptions<HostNode, HostElement>) {
+  return baseCreateRenderer<HostNode, HostElement>(options)
+}
+
+4.调用到了baseCreateRenderer, baseCreateRenderer,很庞大,简单来说,
+vnode,diff,patch均在这个方法中实现,看看return baseCreateRenderer到底return啥
+-return{
+    render,
+    hydrate,
+    createApp:createAppAPI(render,hydrate)
+}
+这三个函数,生成的 render 传给 createAppAPI 这个真正的 createApp 方法，
+hydrate 为可选参数，ssr 的场景下会用到，这边我们也先跳过.
+--------------------------------------------------------------------------
+defineComponet相关
+5.defineComponent用于创建组件,
+const MyComponent = defineComponent({
+  data() {
+    return { count: 1 }
+  },
+  methods: {
+    increment() {
+      this.count++
+    }
+  }
+})
+MyComponent对象里面包含着data,methods对象,有什么加什么
+------------------------------------------------------------------------
+h()相关
+6.h()干嘛的,代表hyperscript,是html的一部分,表示超文本标记语言.
+在处理一个脚本时候,在虚拟DOM节点去使用它进行替换已经成为一种惯例.
+总结起来,Hyperscript本身表示的是:生成HTML结构的脚本,
+gpt说都是用来创建虚拟节点的,不过createVNode是底层,一般用h(),
+h()函数内部逻辑只做参数检查,真正的实现还是createVNode
+
+7.看看function h(type: any, propsOrChildren?: any, children?: any){
+  根据传入参数数量对超文本标签进行处理
+  // single vnode without props
+      if (isVNode(propsOrChildren)) {
+        return createVNode(type, null, [propsOrChildren])
+      }
+      // props without children
+      return createVNode(type, propsOrChildren)
+}
+这里返回了createVNode,也就是参数检查完成后,虚拟节点真正的创建者
+
+8.createVNode做的事情很简单
+const vnode = createVNode('p', { id: 'my-paragraph' }, 'This is a paragraph.')
+第一个参数 'p' 表示节点的标签名。
+第二个参数 { id: 'my-paragraph' } 是一个包含节点属性的对象，它描述了该段落节点的 id。
+第三个参数 'This is a paragraph.' 是节点内的文本内容。
+，先将组件内部的 HTML 模板解析为虚拟节点树，再通过 diff 算法比较前后两棵虚拟节点树之间的差异，
+最后只更新精确到需要变化的 VNode，减少了对真实 DOM 的直接操作，提高了页面的性能。
+//createVNode标准化props class,给Vnode打上编码标记(patch),创建VNode,标准化子节点
+----------------------------------------------------------------------------
+nextTick相关
+在下次DOM更新循环结束之后执行延迟回调,在修改数据之后立即调用这个方法,
+获取更新后的DOM,底层执行了一次resolve()以及返回了then(),即异步微任务
+
+-------------------------------------------------------------------------
+1.拉开序幕
+reference对象，简称ref对象：
+let a = ref('xx') 返回RefImpl对象，这个引用对象实现响应式,
+其中的get也是通过defineProperty实现的，监听属性名为value。
+后续想要实现响应式修改，得改a.value，而非a对象；
+另外模板字符串会自动浅层解包，从而避免a.value(解析时发现是ref对象，自动读取value)
+如果ref内容是引用类型，那么则是Proxy类型，使用a.value.属性名 即可实现响应式
+*发现_value内容如果是基本类型，则是值；
+引用类型，则是Proxy的实例，也就是一个代理对象。这里用了Vue3的新函数：reactive.
+*如果每次都要使用a.value多麻烦,reactive({a:1})能解决这个问题,直接a就能得到Proxy对象
+*Proxy读取get;删除deleteProperty;增加,改set(因为它俩共用target[name] = value)
+
+再说一下defineProperty
+新增属性,删除属性,界面不会更新;
+直接通过下标修改数组,界面不会自动更新
+this.$set(this.person,'gender','男')对象添加
+this.$set(this.person.hobby,0,'元素')下标0添加
+this.$delete(this.person,'gender')删除
+
+说说Reflect
+正在逐渐吸收Object的方法；
+有个约定俗成的做法，在Proxy中使用Reflect的方法。这样可以避免报错，例如
+Reflect.get(target,name)获取不存在属性，它可以自动处理错误，不需要
+显式地编写try-catch
+
+说说vue2的一些落后的点：
+-vc.$attrs会有到props没有接收父组件的值，接收到都在props里；
+-父组件使用子组件时候，如果子组件没有slot标签，那么父组件插入的标签是插不进去的，
+但是可以在vc.$slot里面找到一个数组，里面就有VNode（记得slot也可以取名，在vc.$slot数组就有属性名了）
+
+然后引出vue3的setup():
+它在生命周期中早于beforeCreate,可接收两个参数(props,context),其中,
+props是经过Proxy实例化的对象,传递的props成了proxy实例的属性;
+context是一个普通对象,但是里面属性包含着attrs,slots,还有个emit;
+context.emit('name',666)跨组件触发自定义方法 name是方法名,666是传的参数
+
+再引出 script setup 语法糖，组件只需引入不用注册(无需再通过components进行注册)，
+属性和方法也不用返回，
+也不用写setup函数，也不用写export default ，
+甚至是自定义指令也可以在我们的template中自动获得。
+<script setup="props, { emit }" lang="ts">,括号俩参数也能在标签里用
+
+computed也需要import,
+let fullName = computed({get,set(value)})
+watch也需要import,
+watch(name,(newValue,oldValue)=>{},{immediate:true}),简洁很多,name变化就执行匿名回调,
+-面对多个监听,你可以写数组,但是newValue和oldValue也会变成数组,
+-第三个参数可以配置immediate,也就是所谓的立即执行一次.
+-当watch监听代理对象proxy实例时,newValue和oldValue会出现问题,都一样.
+-vue3的watch是关不掉deep的.
+-watch监听仅限ref,reactive的对象(RefImple,Proxy),
+数组.数组(RefImple,Proxy对象的数组)也得是响应式数组.如果Ref内置对象,那么value是Proxy,是响应式的.
+*坑:watch第一个参数建议函数式,这样deep是可控的;写变量deep固定true.有递归性能影响
+
+watchEffect惰性监视
+你在回调中用到了谁,谁就会触发惰性监视的回调,很神奇;
+还能够分别多层级对象,当然了,也是浅层监听.
+-老师说很像computed,因为依赖变了,自己就变了,只不过这个没有返回值,要的是回调.
+
+hooks函数
+本质上是一个函数，把setup函数中使用的composition API进行了封装；
+类似vue2的mixin。
+写成hooks文件夹下的ts文件，主打的就是一个复用。
+
+toRef
+保持引用关系，用法和ref不同在于需要给第二个参数传值，这个值是属性名字符串
+
+readonly,shallowReadonly
+响应式数据只读，浅只读
+
+toRaw，markRaw(都限制reactive对象)
+toRaw由reactive生成的响应式数据转换为非响应式数据，也就是很原始的object
+markRaw使一个对象永远不会再成为一个响应式对象
+
+customRef的使用,手动档数据更新
+function myRef(value){
+  return customRef((track,trigger)=>{
+    return {
+      get(){
+        track() //通知Vue追踪value的变化
+        return value
+      }
+      set(value){
+        value = newValue
+        trigger() //通知Vue重新解析模板
+      }
+    }
+  })
+}
+
+provide祖先组件给inject孙组件提供值,接收ref和reactive;
+父子传值请用props
+
+isRef,isReactive,isReadonly,isProxy,这四个是代理判断
+
+vue3的Fragment会自动添加根组件
+
+teleport to="" 传送标签,传送到目标标签之下,老师举例的是if判断遮罩跳出自己的标签位置
+
+defineAsyncComponet异步引入组件(动态引入)
+const Child = defineAsyncComponet(()=>import('./Child.vue'))
+
+Suspense标签，感觉很适合做骨架屏
+<Suspense>
+
+</Suspense>
+
+Vue.prototype改为了app.config.globalProperties

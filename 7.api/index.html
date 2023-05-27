@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button>Get</button>
+    <button>Post</button>
+    <button>Delete</button>
+
+<script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+<script>
+    let btn = document.querySelectorAll('button')
+
+    btn[0].onclick =function(){
+        console.log('回复!'); 
+        axios({
+        method:'GET',
+        url:'http://127.0.0.1:8080/api/get'
+    }).then(res =>{
+        console.log(res);
+    })
+}
+
+    btn[1].onclick = function (){
+        console.log('post');
+        axios({
+        method:'POST',
+        url:'http://127.0.0.1:8080/api/post',
+        data:{
+            student : '空崎日奈'
+        }
+    }).then(res =>{
+        console.log(res);
+    })
+} 
+
+btn[2].onclick = function (){
+        console.log('delete');
+        axios({
+        method:'DELETE',
+        url:'http://127.0.0.1:8080/api/delete',
+        success:function(res){
+            console.log(res);
+        }    
+    }).then(res =>{
+        console.log(res);
+    })
+} 
+</script>
+</body>
+</html>

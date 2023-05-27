@@ -1,0 +1,541 @@
+-Array和Object之类的可以不写new，并且Array(3)可以预设数组的长度，都是undefined
+-转换成number，undefined-NaN，null-0，true-1，false-0；发送这种情况是因为调用了Object.prototype
+之内的valueOf()或者toString()函数，return了不同值，效果就是开头
+-假值在if括号内通过抽象函数toBoolean可以转，包括undefined，null，0，"",NaN，以及false
+-全局函数isNaN()会尝试把内容转换为数字，而Number.isNaN()则必须NaN才返回true
+
+*基本数据类型本来就不是对象，只占用栈内存；new的是对象类型的基本数据，
+但是基本数据类型可以使用原型链上的函数，这是js底层实现的自动转换，叫做装箱(Boxing)；
+拆箱可以用Object.prototype.valueOf()来进行，将之变为基本数据类型（原始值）*
+
+-然JavaScript会调用对象的valueOf()方法来获取原始值，但是如果对象没有定义valueOf()方法或者valueOf()方法返回的不是原始值，
+则JavaScript会调用对象的toString()方法来获取原始值。
+因此，在实现自定义对象时，需要同时实现valueOf()和toString()方法，
+并确保它们返回的是正确的原始值。
+
+*解析字符串*
+parseInt()从左到右解析，一旦没有数字便返回结果；保留进制和小数。
+Number不会保留小数
+
+[[DefaultValue]]这是尝试获取默认值行为，先valueOf，后toString，都没有就抛出异常
+想想它们为什么能合并，是否出现了隐式调用行为
+-判断的时候就会触发隐式转换。
+注意自定义构造函数如果不继承Object.prototype的俩方法，会导致无法隐式转换，而抛出错误。
+- || 和 && 会对操作数判断；不是布尔值会进行ToBoolean强转换，再判断。
+它们是返回自己true，判断也是从左到右，很巧妙，||true返回左，false返回右，&&相反
+注意假值。
+
+-NaN 和 NaN 是不相等的,===返回false；另外对于对象，===会要求引用地址相同，总之栈相同。
+严格相等不会进行隐式转换，但==会。
+
+-Symbol除了显示转换的Symbol.prototype.toString()以及隐式转换ToBoolean，
+其他的都是不可以的，并且隐式布尔转换默认true，你Symbol(false)也没用；
+显式转换成字符串可以，隐式不行；显示隐式转换布尔都可以，不过固定true；
+不过就跟布尔固定true一样，你拖着个Symbol()也没用啊，一般就防属性名重复。
+-let a = Symbol('我是用来描述的')，[a]拿去做对象不可重名的属性用
+-在使用Symbol类型的值作为对象的键名时，如果没有使用方括号语法来声明键名，会报错。
+因为Symbol类型的值不能被隐式转换为字符串。
+
+-对象中把属性名用[]包住，就可以写外面的变量了，生成动态属性名
+
+-ToPrimitive(to原始值) 抽象操作的行为如下：
+如果输入值已经是原始值，则直接返回。
+如果输入值是对象，则调用该对象的 valueOf() 方法。如果该方法返回原始值，则返回该值。
+如果 valueOf() 方法返回一个对象，则调用该对象的 toString() 方法。如果该方法返回原始值，则返回该值。
+如果 valueOf() 和 toString() 方法都返回对象，则抛出 TypeError 异常。
+-注意，ToPrimitive 抽象操作只会在需要将对象强制转换为原始值时才会被调用。
+例如，在比较两个对象时，JavaScript 会先将它们转换为字符串或数字，而不是调用 ToPrimitive 抽象操作。
+
+-关于==的一些隐式转换
+字符串和数字：字符串转数字，也就是强制转换后才会比较
+布尔值和其他类型：布尔先变成数字，其他类型也尽可能变数字
+null == undefined 返回true，其他的跟他哥俩都是false
+NaN万物false，本身也false
+两个对象比较它俩是否指向同一对象，也就是同一内存地址
+
+-Math.random()不包括1，包括0
+
+-sort()底层是快速排序算法，需要传a，b值就是因为算法，
+结果负数a排b前，正数a排b后，0不变，所以就有了a-b升序，b-a降序，
+？底层不停拆分，拆到长度一为止，所以每个都排好序？
+
+-创建对象
+现在了解到一个“动态原型模式”，用if判断function来决定是否加入属性函数
+
+-作用域（上下文）Scope
+
+-this进阶
+--方法调用模式，面对一个对象，this可以访问到其他变量属性，调用函数属性改变其他变量
+--函数调用模式，this指向window，所以可以操作全局变量
+--构造器调用模式，this指向new的对象
+--apply,call改变this指向，并会立即执行函数；
+bind也是绑定变量改变this指向，一般 let a = 函数.bind(指向); a()这么用，因为需要二次调用，一般不传参
+
+-eval()函数
+一个全局函数，可以把字符串解析成js代码，不过应该避免使用，因为不安全，且非常消耗性能
+
+-更加理解DOM
+Document Object Model，文档对象模型，为了可以用编程的方法操作HTML内容
+HTML整个看为一个对象树(DOM树)，DOM树本身和它内容里的标签都可以看作对象，每个对象都叫一个节点(Node)
+DOM树下还有一些其他对象，document是其中的根对象；
+document是整个HTML，同时也是整个DOM树的根节点，可以访问到各个属性;
+-BOM处于window之下，操作浏览器；document处于window之下，操作DOM树
+
+-浏览器的对象
+全局对象window，可以操作BOM和DOM对象
+DOM对象：是文档对象模型的对象，表示文档节点，元素节点等，通过window对象来访问和操作
+BOM对象：location，history等对象都属于BOM，也通过window访问
+自定义对象：XMLHttpRequest就是
+
+-事件与事件流
+DOM是树型结构，如果给父子节点绑定事件，触发子节点，事件顺序如何决定？
+现在采用的是W3C标准的DOM2事件模型
+-两种事件流
+事件捕获:与事件冒泡相反，但是只会到目标标签的父节点；
+事件冒泡:从下往上传播，由最年幼的标签接收，然后逐层向上直至DOM中最高层的父节点
+捕获阶段-》目标阶段-》冒泡阶段，捕获到目标的父节点，目标节点，然后从目标到DOM根目录
+stopPropagation阻止冒泡，preventDefault阻止默认行为，这两个写在匿名回调函数里。阻止捕获改第三参数true就行
+
+-三种事件模型
+主要还是兼容性问题，DOM0和IE还有DOM2
+
+-事件委派
+利用浏览器事件冒泡机制实现。有些函数不支持捕获阶段触发，所以监听函数默认冒泡监听了，也影响到了事件委派
+
+-Array.prototype.map函数
+map(callbackFn)，map会给原数组中每个元素都调用一次callbackFn函数，并传入最多仨个参数（值，索引，数组），然后把每个返回值组合成一个新数组；
+只会在有值的索引被调用，没被赋值或者delete删除的索引不会调用。请一定要用到return，否则请用for of，for in
+
+-window.parseInt()函数
+可传入俩参数，第一字符串；第二个写进制数，2~36之间，乱写会导致NaN
+
+-instanceof 用于检测某个是否是某个构造函数的实例
+Function instanceof Object --true
+
+-new一个对象发生了什么？
+创建一个新的空对象(实例对象)
+将空对象的原型链__proto__指向构造函数的原型对象prototype
+将构造函数的作用域赋给新对象，使新对象可以访问构造函数中的属性和方法 this --> a
+执行构造函数中的代码，为新对象添加属性和方法 a.name = name
+将构造函数的constructor属性添加到新对象的原型链中，原型链（原型对象）上往往有很多原型方法，以及constructor
+返回新对象
+
+-hasOwnProPerty不会查找原型链，以及上面的属性
+
+-Object.defineProperty仅限单个值，但是有更加精细的操作，除了上面仨其他默认false
+configurable-可修改特性
+enumerable-可枚举
+writable-可修改
+value-值，可基本可引用
+get，getter函数，引用时调用；set，setter函数，修改时调用
+
+-js延迟加载
+等待页面加载完成之后再加载JS文件，有助于提高页码加载速度
+都是导入script文件，一个defer，异步下载，同步执行；一个async，下载和执行都异步；
+通过动态创建DOM标签对加载事件监听，动态引入js文件，感觉没啥必要
+
+-浏览器缓存机制
+资源在有效期间内被再次请求，浏览器会直接使用缓存副本，而非向服务器发起请求；
+web资源缓存策略由服务器指定，强缓存策略；协商缓存策略。
+-强缓存策略：如果缓存资源有效，则直接使用缓存资源，不向服务器发起请求。
+有两种方式可以设置：http头Expires属性和Cache-Control属性
+-协商缓存策略:Last-Modified和E-tag,一个精度秒,一个给一个独特值.浏览器发出If-Modified-Since 尝试和服务器匹配，没有修改就返回304。LM精度只有秒 
+-这俩一个Cache一个E-tag优先度高
+
+-同源政策
+浏览器下js脚本未经允许，不能访问另一个域的内容（协议、域名、端口号一致）
+同源政策限制三方面：以下都是非同源情况
+-js脚本不能访问其他域 cookie、localStorage、indexDB
+-js脚本不能操作访问其他域DOM
+-不能发送跨域请求
+这是对js脚本的一种限制，不是对浏览器的限制；
+对于一般img或者script脚本请求不会有跨域限制，因为一般没安全问题
+
+-解决跨域
+--JSONP，应用于不支持CORS的老旧浏览器，安全性较差
+--CORS全称是"跨域资源共享"（Cross-origin resource sharing），
+后端服务器响应 Access-Control-Allow-Origin，需要与请求头等待Origin保持一致，否则拒绝
+--服务器代理,用代理服务器接收请求,改动后发给目标服务器，获取数据后再发给请求者。代理服务器不受同源政策影响
+
+-cookie
+-用于维护会话状态的数据，通过服务器发送到浏览器，浏览器保存在本地。下一次有同源请求时，已经保存的cookie
+将添加到请求头部，发送给服务端。这可以用来实现记录用户登录状态。一般限制4k大小，且只能被同源网页访问。
+-set-cookie可以设置
+Domain：cookie所属的域名。如果不设置该属性，则默认为当前页面的域名。
+Path：cookie所在的路径。默认为“/”，表示整个网站都可以访问该cookie。
+Expires/Max-Age：cookie的有效期。Expires属性设置的是一个绝对时间，而Max-Age属性设置的是cookie在客户端保存的秒数。
+Secure：仅在HTTPS协议下才会发送该cookie。
+HttpOnly：禁止JavaScript访问该cookie，防止跨站点脚本攻击。
+
+-session
+类似一个在服务器的cookie,也适用于保持会话状态。
+
+-token
+express里用const jwt = require('jsonwebtoken');
+jwt.sign(abc,secretKey)加密,获取Authorization用jwt.verify(token,secretKey)解密
+
+-模块化之路
+函数到构造函数，再到立即执行函数，等待，后续就有了一些相关规范
+require，module.exports，适用于服务端，因为它是以同步方式引入，而服务端文件都在本地；
+AMD方案，采用异步加载模块，
+看不懂呀
+
+-class
+比如构造函数时Person
+es6之前用法是new function，这样如果不特别去设定，实例对象自身不携带constructor对象也就是构造函数本身；
+如果想要在构造函数原型对象上加属性，还得在外面另起一行Person.prototype上加，麻烦
+-不可枚举
+-class还有其他的语法糖
+-extends继承
+需要在constructor内带上super，这是定式
+-get/set：监控分两种，一种监控形参，一种自行定义新参数
+监控constructor的形参时：get不能单独使用，会报错；不过set形参的话，原本值会被覆盖，直接属性消失，请另外赋值！
+另起炉灶定义新属性：get，set都正常使用；get需要return取值，set就弄点触发函数吧。
+*所以用不用set监控constructor形参，而是要存储值，然后赋值给形参；
+get和set总是配套使用，请这样做。*
+-static静态属性只能通过函数自身来访问，如果实例对象想访问静态属性，得a.__proto__.constructor
+
+-document.write会导致整个页面重绘
+-innerHTML只会单个重绘
+
+-Function.prototype.call 和 Function.prototype.apply
+fn.apply(xx,[1,2])
+fn.call(xx,1,2)
+
+-不可枚举
+内置的Js构造函数原型对象的属性,Object.prototype
+内置的Js对象的属性,length,name
+Objec.defineProperty()定义的属性,如果在定义时将其 enumerable 属性设置为 false，则它将不可枚举。
+
+-"迭代（iteration）" 和 "枚举（enumeration）" 
+*迭代是指使用某种迭代器来遍历对象的所有元素。*
+*枚举是指遍历对象的属性名，并对每个属性执行一些操作。*
+-迭代指用迭代器遍历一个对象所有属性,底层原理是具有next()方法的对象,
+每次调用next()方法都会返回对象的下一元素,直到所有元素遍历完毕。如，数组，字符串，Map，Set；
+-枚举则是针对有可遍历属性的操作，如for in；for of等，记住definePropery的联动，设置了 enumerable: true,
+-*再说一句枚举和迭代
+是否可枚举指的是属性；
+迭代是一种行为，for of和for in就是两个迭代器，分别用于遍历可枚举的属性值/属性名
+*
+Object.prototype上面的各种属性自带可枚举为false，所以for in时候不会出现，而新加入prototype的会出现
+-可迭代：存在iterator属性，内置next()；-可枚举：属性不被enumrable：false就可以
+-伪数组的length以及原生prototype属性是不可枚举的
+
+-让对象使用数组的方法
+比如join:Array.prototype.join.call(obj, separator)
+想要完全使用数组函数，对象是有要求的：
+1.属性名必须为数字类型，可以是数字或字符串类型的数字。
+2.属性名必须按照从小到大的顺序排列。
+3.对象必须具有 length 属性，用于表示元素的数量。
+总之，call，bind，apply和this密切相关
+
+-arguments ES5↓
+arguments是函数体内部自动创建的一个对象，不能写在形参，用于存储传入函数的参数，是个伪数组
+-...arr ES6↑
+这是扩展运算符，和arguments不同，写在形参自动接收不同数量参数，也省事。产生的是真数组
+已经可以替代arguments了，gpt都说好。
+
+-Array.prototype.fill(value,start,end)
+数组填充,按索引来，start默认0；end默认this对象的length，不包含最后一个(length - 1)。
+-只能在已有长度改变，不能变长
+
+-尾后逗号
+数组末尾加个逗号，没感觉到有什么用，说防止修改倒数第二行导致错误
+
+-让Js的性能更高
+for循环提前写好数组长度
+避免深层嵌套循环if(if)
+不要使用未定义变量(?)，说return的东西没定义会变成全局
+
+-深入理解V8引擎的垃圾回收机制
+新生代：来的快去的快；老生代：连接数据库之类的，一直占着内存
+1.全停顿-老生代(不使用)
+GC一次会暂停应用逻辑的进行，就是卡一小下；暂停程序运行，扫描堆内存，标记不活动对象并清理。
+2.增量标记-老生代(在使用)
+边GC边执行任务，虽然GC总时间更长，但减少了应用停顿时间，提高了响应速度
+3.Scavenge(清除)算法-适用新生代
+将堆内存一分为二，从From空间将活着的对象复制到To空间；然后清空From所有对象；互换From和To空间对象
+*找到一个不再使用的对象并回收，是垃圾回收的结果**上面的是实现的算法*
+
+-可能会导致内存泄漏的情况
+使用了未声明变量，会导致该变量变为全局变量，直到关闭浏览器才会回收；
+使用SetInterval定时器而忘记关闭它；
+对DOM引用(如监听器),后续DOM移除，但引用未移除；
+不合理的闭包，一般是导致全局变量释放
+
+-script标签在body内外的区别
+放里面解析到html时候会暂停解析，立即加载并执行脚本，然后继续解析html
+-总之放外边比较好
+
+-解决移动端300ms延迟
+-touch-action: none，在css就可以
+-禁用缩放，在html头部<meta name="viewport" content="user-scalable=no">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1">
+
+-前端测试
+-TDD：测试驱动开发
+1.确定目标，从用户故事和需求文档确定；
+2.写测试用例，多写点输入可能，为的就是能达到目的；
+3.运行测试：执行看看能不能运行通过；还要反复测试
+4.重复测试：反复试错，错了重来
+5.代码重构：加性能
+单元测试(Unit Test)是TDD的重要组成部分，通常自动化的
+-单元测试工具sinon
+写作人员基本就是技术
+-BDD：行为驱动开发
+用自然语言写，方便和业务员沟通；
+协作人员很多，有技术有业务
+
+-判断浏览器
+window.navigator.userAgent
+
+-polyfill
+随着版本更新，js自带api越来越多，为了兼容低版本的浏览器，会写一些js文件。这些文件就是polyfile
+
+-正则补充
+- match()除非使用/g全局搜索，不然返回的是一个长度为2的伪数组，0是全，1是.*?的内容
+- .* 贪婪，.*? 非贪婪
+- ^a 以a为开头；[^abc]只要出现了abc任意字母的地方都会被排除asbsc-->ss
+- $a以a结尾
+- +是贪婪的，不过会按照前面要求，一般搭配()使用，如 ([a-z]+)匹配所有小写
+- [a-z]匹配一个小写字母，如果想多匹配记得 ([a-z]+)
+
+==和===补充
+Object.is(x,y)判断相等和===差不多，但是处理了 -0和+0不再相等；俩NaN是相等的...有病
+
+-编码
+ASCII -> ANSI -> UNICODE（这些都是规范）
+ANSI开始支持汉字，GB2312，GBK，GB18030
+Unicode是内存编码表示方案（是规范），而UTF是如何保存和传输Unicode的方案（是实现）。
+常用utf-8
+
+-事件循环补充*不要弄混
+事件队列Eventloop：存储着执行任务的队列，严格按照先后顺序执行
+执行栈：类似函数调用栈的运行容器，当执行栈为空，js便检查事件队列，不为空，将第一个任务压入执行栈
+栈帧：栈帧可以理解为函数上下文的作用域，有着先进后出的原则。父作用域(大栈帧)先入后出，子函数(栈帧)用完
+就会被弹出执行栈。子函数执行完，返回到上一个栈帧(父作用域)。虽然作用域有父子关系，但是栈帧没有
+函数的调用：后进先出，用完就弹出执行栈。
+
+-任务队列:分为宏任务队列和微任务队列,当执行栈任务都执行完毕后,js优先将微任务压入执行栈;
+setTimeout入栈后会立即出栈，并将自己的事件加入WebAPIs(浏览器创建的线程)，时间一到加入宏任务队列
+当微任务队列任务都执行完毕,再去判断宏任务队列的任务.
+-宏任务和微任务
+宏任务：setTimeout、I/O、UI操作
+微任务：Promise.then，node里的process.nextTick
+ps.Promise.resolve()这种静态方法可用，是同步的。传参可以是另一个Promise，不过then里会原样奉还；
+如果传入一个原始值之类的，那还行，then传值是你想要的。
+https://juejin.cn/post/6844903606466904078,用图像解释很清楚
+
+-函数柯里化
+利用闭包特性，把一组参数拆成一个个的，小块小块的方便操作。
+一开始是fn(x,y)  柯里化：  function add() -> let fn2 = add(x)  ->  fn2(y)
+
+-小数精度丢失问题
+因为本来是二进制，转换过程存在这种问题
+
+-XSS于CSRF
+-xss侧重注入脚本：
+反射型：根据url字符,反射到页面;代码交给服务器，服务器返回再给客户端
+储存型：代码交给服务器，再交到数据库
+DOM型：仅仅在客户端运行
+csrf侧重借用户名义干事：
+常见有img内嵌get请求,达到接口干坏事.所以敏感信息不用get
+
+-MVC,MVP,MVVM三种软件架构设计模式
+总之vue是MVVM
+
+-发布订阅者模式
+主题对象subject分出四部分:存储订阅者对象数组;订阅属性函数;取消订阅属性函数;通知属性函数.
+通过subject.subscribe(a)订阅;subject.notify('通知'),subject.unsc(a)取消
+-主要目的是为了解耦，也可以按需订阅自己感兴趣的主题。
+
+-defineProperty的一些局限
+1.无法监听通过下标修改值的变化，需要使用特殊的方法或者使用Vue提供的$set方法。
+2.和浅拷贝一样无法深度监听，只能一层，意思是监听了内存地址
+
+-浏览器渲染过程-个人简写
+1.html解析成DOM树
+2.DOM树内有资源树,资源下载Js和Css,下载过程时异步的,变成脚本和CSSOM也是异步
+3.合并成为渲染树
+4.布局，把渲染树的东西转换为浏览器可以显示的元素
+5.绘制
+
+-DOM树元素节点分类
+0.节点：每个元素都是一个节点
+1.元素节点，nodeType为1，表示是元素节点，如<div> <p>等标签
+2.属性节点，为2，属性节点，如class，id等属性
+3.文本节点，为3，标签内的文本内容
+4.注释节点，为8，还有这玩意？
+-相较于虚拟DOM，真实DOM优势在于详细
+-document对象是DOM树根节点，不在元素范围内
+
+-虚拟DOM示例
+let newVDOM = { // 新虚拟DOM
+        tagName: 'ul', // 标签名
+        props: { // 标签属性
+            id: 'list'
+        },
+        children: [ // 标签子节点
+            {
+                tagName: 'li', props: { class: 'item' }, children: ['哈哈']
+            },
+            {
+                tagName: 'li', props: { class: 'item' }, children: ['呵呵']
+            },
+            {
+                tagName: 'li', props: { class: 'item' }, children: ['林三心哈哈哈哈哈']
+            },
+        ]
+    }
+-正是因为虚拟DOM，v-for由于标签类型、属性名、子节点都一致，才需要用到key
+
+-虚拟DOM与diff算法
+虚拟DOM三属性，tag标签名<div>，attrs标签属性<class>，children子标签节点(最低层是值)；
+过程是从div属性比较，每遍历到一个节点比较一下，从上往下直到最后，发现修改的节点；
+深度优先遍历。
+-也因此需要减少标签的嵌套
+
+-虚拟DOM
+-使用虚拟DOM的流程：
+首次渲染页面时，生成一个虚拟DOM树。
+当页面数据发生变化时，生成一个新的虚拟DOM树。
+比较新旧虚拟DOM树之间的差异，只更新需要改变的部分。
+将更新后的虚拟DOM树渲染到页面上。
+-不使用虚拟DOM的流程：
+首次渲染页面时，生成一个真实的DOM树。
+当页面数据发生变化时，重新生成一个新的真实DOM树。
+将新的真实DOM树渲染到页面上.
+
+-异步编程的实现
+-回调函数
+-事件监听
+-发布/订阅
+-Promise对象
+promise补充，promise内部是一个异步回调，是宏任务；但是then是微任务，会在
+promise对象变为已成功或者已失败时立即加入微任务队列，从而实现了多个并列
+promise都携带then，还能够有序执行（宏->微->宏->微）。
+-Generator函数
+-async函数
+
+-异步和回调函数密切相关
+
+-mouseover和mouseout有事件委派,
+mouseenter和mouseleave可以避免事件委派,虽然都是一进一出,但还是有区别的
+
+-event.clientX/Y;用于获取鼠标的横纵坐标px
+
+-尾调用
+末尾以return形式
+方便回调;方便递归;以及一些高级用法
+
+-Proxy构造函数
+new Proxy(目标target,handler对象用于操作)
+const handler = {get(target,prop,receiver){}}（关于get，set为什么要有三个参数，target[prop] = value）
+Proxy的操作是数据劫持操作，你可以根据需求来改变，有需求target原本值也能改
+相较于defineProperty劫持属性，Proxy劫持的是对象，灵活多了    
+
+-Set,WeakSet构造函数
+Set是个降重神器，实例化时参数写数组获得一个降过重的对象，Array.from化身数组；
+add()加属性(可打点连续调用(链式))，delete()去属性，has()检查是否有属性，clear()清空
+-WeakSet内部建议放引用类型而非原始值，也就是对象之类的；
+它不能在初始化的时候就赋值，一定要用add({a:1})，不能用for of遍历，也没有size，clear()
+呃，WeakSet主要方便在可以不用手动置空释放内存。
+
+-Map,WeakMap构造函数
+-Map可以创造键值对对象，用set来添加属性，可以用for of遍历值，得一个长度为2的数组
+-WeakMap一样只接受键名为引用类型
+ps.Set和Map是可迭代对象，Array.from()是有效的；另外from可以用在length的类数组
+
+-Reflect对象
+非构造函数，所有属性和方法都是静态的
+
+-浏览器从html渲染到底的补充
+1.浏览器解析HTML文档解析成DOM树后，会根据DOM树引用的外部资源生成资源树，异步下载
+并解析这些文件后形成一棵树状结构；
+2.解析CSS会形成CSS规则树
+3.解析Js会形成抽象语法树
+4.解析完所有外部资源后，将CSS规则树和抽象语法树合并到DOM，形成渲染树；
+5.渲染树开始布局/回流(Layout，计算元素位置和大小)和绘制(Paint)，将结果呈现到页面
+
+let,const在全局作用域是不会生效的,想要生效请使用var
+
+
+-this指向的进一步了解
+this是动态的，实例化时指向实例对象，其中如果有函数体又会变成undefined/window，
+再用bind又转变成实例对象了。
+-(1)函数作为对象的方法调用,this指向这个对象
+const obj = {
+    name : 'a'
+    hello(){
+        log(this.name)  
+    }
+}
+obj.hello() //a
+-(2)函数作为普通函数调用,this指向window
+function fn(){}
+fn()
+-(3)call,apply,bind方法调用，this指向指定对象
+不多介绍，上面有
+-(4)作为构造函数调用，this会指向新创建的对象
+function Person(name){
+    this.name = name
+}
+let tom = new Person('Tom')
+log(tom.name) //Tom
+-(5)箭头函数没有自己的this值，它的this继承自外层作用域
+
+关于class的一些补充
+constructor(){
+
+}外面正常定义(比如不使用static)的内容,是直接定义在原型对象内的,而且是不可
+枚举的属性,我对比了一下。
+
+系统地学习一下class
+-提升
+不同于函数声明的构造函数，类声明并不会存在提升，类似let后定义先调用，会抛出错误。
+-类的命名
+可以使用匿名类：let ClassName = class{}
+也可以使用命名类：class ClassName{}
+它俩也受到类提升的限制
+
+解构的小技巧
+-从对象中获取属性,可以省略不必要的变量声明
+let person = {
+    age:18,
+    gender:'male',
+    name:'jack'
+}
+const {age , gender:sex , name} = person
+log(age,sex,name)即可获取到新定义的值
+
+-从数组中获取元素
+let arr = [1,2,3,4,5]
+let [a,b,...arr1] = arr
+log(a,b,arr1)//1  2  [3,4,5]
+
+-从函数参数解构
+如果传入值是fn(person),你可以在function fn({age,gender})这么写,省去person.age
+
+ES6中字面量简写法
+    let _id = '99'
+    let boy = function(){
+        console.log('yes');
+    }
+    let target = {
+        name : 'jack',
+        _id,//变量
+        girl(){//函数简写
+            console.log('hey');
+        },
+        boy,//函数
+    }
+    console.log(target._id);
+    target.boy()
+总之,简写同名变量,或者函数funciton免写,都是对象~
+
+记住,直接对值进行修改,如果是原始值,则会立即回收旧值,赋予新值在新的内存
+
+
+
+
+

@@ -1,0 +1,15 @@
+-- select username from users;
+-- insert into users (username,password) values ('Hina','123');
+-- update users set password='1234' where id=3
+-- update users set password='12345',status='1' where id=2;
+-- 插入用括号，更新用逗号
+-- delete from users where id=4;
+-- <>不等于 >=大于等于
+-- AND&& OR||
+-- ORDER BY ASC升序 DESC降序
+-- select * from users order by status;
+-- select * from users order by status desc; -- 默认升序，降序另加
+-- select * from users order by status,username DESC; -- 多重排序,从前到后
+-- select count(*) from users where status=0; -- count在用法同select,不过变成了计数器
+-- select count(*) as total from users where status=0; -- count后加个as可以重命名,哪都可以重命名
+SELECT * FROM users;

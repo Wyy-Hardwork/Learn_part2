@@ -1,0 +1,18 @@
+一、mustache模板引擎
+1.数据变为视图，实现v-for
+-纯DOM法，过去多使用DOM语法，如createElement，querySelector，
+appendChild通过js操作DOM，如果内部结构复杂，这回变得非常麻烦，className，innerText之类的
+
+-数组join法，一个数组，每一个元素用字符串来写html标签，并用逗号隔开。最后通过
+innerHTML的数组join来添加html，而免去很多dom操作，比如：
+list.innerHTML += ['<p>年龄：' + arr[i].age + '</p>',].join('')实现数据与目标双开花。
+
+-ES6的反引号法
+list.innerHTML += <p>年龄： ${arr[i].age}   </p>`
+可以写标签，而且用回车换行也是可行的
+
+-模板引擎法mustache(最优雅)
+Mustache.render(templateStr,data)
+{{#arr}}//告诉你可以循环data的arr数组
+     <p>年龄： {{age}}   </p> //这里就很像vue了，xx in items
+{{/arr}}

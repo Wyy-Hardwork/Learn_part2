@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+</body>
+<script>
+
+let a = {
+  x:1,
+  arr:[1,2,3],
+  obj:{
+    a:1
+  }
+}
+a.y = 2
+let b = new Proxy(a,{
+  get(target,name){
+    // console.log('获取了b对象内的属性'+value);
+    return Reflect.get(target,name)
+  },
+  set(target,name,value){
+    console.log('修改了b对象'+target[name]);
+    return Reflect.set(target,name,value)
+  },
+  deleteProperty(target,name){
+    console.log('属性删除'+target[name]);
+    return Reflect.deleteProperty(target,name)
+  }
+})
+
+// console.log(b.isProxy);
+
+delete b.oxxxx
+b.wow = 'xx'
+console.log(a);
+console.log(b);
+console.log(b.x);
+</script>
+</html>
